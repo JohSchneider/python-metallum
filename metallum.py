@@ -25,7 +25,12 @@ remove_expired_responses()
 
 # Site details
 BASE_URL = 'https://www.metal-archives.com'
+
+import browser_cookie3
+## note: the user-agent has to match the browser from which the 'cf_clearance' cookie comes from
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36'
+
+
 ENC = 'utf8'
 
 # HTML entities
@@ -167,9 +172,14 @@ class Metallum(object):
     _last_request = None
 
     def __init__(self, url):
+
+	## note: set the cookie_file= explicitly, if another profile from firefox is to be used
+        self._cj = browser_cookie3.firefox(domain_name='metal-archives')
+
         self._session = requests_cache.CachedSession(cache_name=CACHE_FILE)
         self._session.hooks = {'response': self._make_throttle_hook()}
         self._session.headers = {'User-Agent': USER_AGENT}
+        self._session.cookies.update(self._cj)
 
         self._html = self._fetch_page(url)
         self._page = PyQuery(self._html)
